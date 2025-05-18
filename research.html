@@ -10,6 +10,18 @@
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="assets/css/main.css">
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
 </head>
 <body>
 
@@ -38,7 +50,8 @@
 
     <!-- Header -->
     <header id="header"><span class="avatar"><img src="images/avatar.jpg" alt="" width="173" height="178"></span>
-        <h1>I am <strong>Jaco ter Hoeve</strong>, a postdoctoral researcher at the <a href="https://higgs.ph.ed.ac.uk">Higgs Centre for Theoretical Physics</a> at <a
+        <h1>I am <strong>Jaco ter Hoeve</strong>, a postdoctoral researcher at the <a href="https://higgs.ph.ed.ac.uk">Higgs
+            Centre for Theoretical Physics</a> at <a
                 href="https://www.ed.ac.uk">the University of Edinburgh</a></h1>
         <ul class="icons">
             <li>
@@ -59,37 +72,110 @@
 
             </header>
             <p>
-            <ul>
+            <h2>Papers loaded from my <a href="https://inspirehep.net/authors/2038934?ui-citation-summary=true">InspireHEP</a>
+                profile</h2>
+            <div id="papers" class="paper-list"></div>
 
-                 <li> J.ter Hoeve,  <i>Fingerprinting New Physics with Effective Field Theories</i>, PhD thesis, <a href="https://arxiv.org/abs/2501.08818">arXiv:2501.08818</a></li>
+            <script>
 
-                <li> E. Celada, T. Giani, J. ter Hoeve, L. Mantani, J. Rojo, A. N. Rossia, M. O. A.
-                Thomas, and E. Vryonidou, <i>Mapping the SMEFT at high-energy
-                colliders: from LEP and the (HL-)LHC to the FCC-ee</i>, JHEP 09
-                (2024) 091, <a href="https://arxiv.org/abs/2404.12809">arXiv:2404.12809</a></li>
+                const size = 50;   // Number of papers per request
+                const maxPapers = 200; // Maximum total papers to fetch to avoid very long load
 
-                 <li> J ter Hoeve, E Laenen, C Marinissen, L Vernazza, G Wang. <i>Region analysis of QED massive fermion form factor</i>,  JHEP 02 (2024) 024,
-                    <a href="https://arxiv.org/abs/2311.16215">arXiv:2311.16215</a></li>
+                const papersList = document.getElementById('papers');
 
-                <li> J. ter Hoeve, G. Magni, J. Rojo, A. N. Rossia, and E. Vryonidou, <i>The automation of SMEFT-assisted constraints on UV-complete models</i>, JHEP 01 (2024) 179, <a href="https://arxiv.org/abs/2309.04523">arXiv:2309.04523</a></li>
-            
-                 <li> H La, A Brokkelkamp, S van der Lippe, J ter Hoeve, J Rojo, and S Conesa-Boj. <i>Edge-Induced
-                    Excitations in Bi$_2$Te$_3$ from Spatially-Resolved Electron Energy-Gain Spectroscopy</i>,
-                     Ultramicroscopy 254 (2023) 113841, <a href="https://arxiv.org/abs/2305.03752">arXiv:2305.03752</a></li>
+                // Encode query for URL
 
-                <li> R G Ambrosio, J ter Hoeve
-                    , M Madigan, J Rojo, and V Sanz. <i>Unbinned multivariate observables for global SMEFT analyses
-                        from machine learning</i>. JHEP 03 (2023), <a href="https://arxiv.org/abs/2211.02058">arXiv:2211.02058</a></li>
+                async function fetchPapers(size, from = 0, accumulated = []) {
+                    const url = "https://inspirehep.net/api/literature?q=author:\"Jaco.ter.Hoeve.1\"&size=25&sort=mostrecent\n"
+                    try {
+                        const response = await fetch(url, {headers: {'Accept': 'application/json'}});
+                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-                <li> A Brokkelkamp, J ter Hoeve
-                    , I Postmes, S E van Heijst, L Maduro, A V Davydov, S Krylyuk, J Rojo, and S Conesa-Boj.
-                   <i>Spatially-Resolved Band Gap and Dielectric Function in 2D Materials from Electron Energy
-                    Loss Spectroscopy</i>. J Phys Chem A, 126 (2022) 1255,
-                    <a href="https://arxiv.org/abs/2202.12572">arXiv:2202.12572</a></li>
+                        const data = await response.json();
+                        const papers = data.hits.hits;
+                        accumulated = accumulated.concat(papers);
+
+                        // Total available papers matching the query
+                        const total = data.hits.total || 0;
+
+                        // Check if we need to fetch more pages
+                        if (accumulated.length < total && accumulated.length < maxPapers) {
+                            // Fetch next page
+                            return fetchPapers(size, from + size, accumulated);
+                        } else {
+                            return accumulated;
+                        }
+                    } catch (err) {
+                        console.error("Error fetching papers:", err);
+                        papersList.innerHTML = '<li>Error loading papers.</li>';
+                        return [];
+                    }
+
+                }
+
+                function renderPapers(papers) {
+                    if (papers.length === 0) {
+                        papersList.innerHTML = '<li>No papers found.</li>';
+                        return;
+                    }
+
+                    papersList.innerHTML = '';
+
+                    papers.forEach(paper => {
+                        const metadata = paper.metadata;
+                        const title = (metadata.titles[0]?.title) || 'No title';
+                        const year = (metadata.earliest_date) || 'N/A';
+                        const url = `https://inspirehep.net/literature/${paper.id}`;
+                        const authors = metadata.authors
+                            ? metadata.authors
+                            .slice(0, 5)                        // Take only first 5 authors
+                            .map(author => author.full_name)
+                            .join(', ') + (metadata.authors.length > 5 ? ', et al.' : '')  // Add "et al." if more than 5 authors
+                            : 'Unknown authors';
+
+                        // Abstract
+                        const abstract = metadata.abstracts && metadata.abstracts.length > 0
+                            ? metadata.abstracts[0].value
+                            : 'No abstract available.';
+
+                        const paperDiv = document.createElement('div');
+                        paperDiv.innerHTML = `
+  <div class="paper-box">
+    <a href="${url}" target="_blank" rel="noopener" class="paper-title">${title}</a>
+    <div class="paper-meta">
+      <span class="paper-year">(${year})</span>
+    </div>
+    <div class="paper-authors"><strong>Authors:</strong> ${authors}</div>
+    <div class="paper-abstract-container">
+      <div class="paper-abstract collapsed"><strong>Abstract:</strong> ${abstract}</div>
+      <button class="toggle-abstract">Show more</button>
+    </div>
+  </div>
+`;
+                        papersList.appendChild(paperDiv);
+                    });
+                    if (window.MathJax) {
+                        MathJax.typesetPromise().catch(err => console.error("MathJax typesetting error:", err));
+                    }
+                    document.addEventListener('click', function (e) {
+                        if (e.target && e.target.classList.contains('toggle-abstract')) {
+                            const abstract = e.target.previousElementSibling;
+                            abstract.classList.toggle('expanded');
+                            if (abstract.classList.contains('expanded')) {
+                                e.target.textContent = 'Show less';
+                            } else {
+                                e.target.textContent = 'Show more';
+                            }
+                        }
+                    });
+                }
+
+                // On page load, fetch and render all papers
+                fetchPapers(size).then(renderPapers);
+
+            </script>
 
 
-
-            </ul>
             </p>
 
         </section>
