@@ -2788,6 +2788,16 @@ button:disabled,
     transition: opacity 1s ease, filter 1s ease;
 }
 
+@media screen and (max-width: 480px) {
+    #wrapper {
+        padding: 0;
+    }
+
+    #header h1 {
+        padding: 0 2em;
+    }
+}
+
 body.is-loading #wrapper {
     opacity: 0;
     -moz-filter: blur(1px);
