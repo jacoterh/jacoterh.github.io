@@ -157,17 +157,17 @@
                     if (window.MathJax) {
                         MathJax.typesetPromise().catch(err => console.error("MathJax typesetting error:", err));
                     }
-                    document.addEventListener('click', function (e) {
+
+                    function toggleAbstractHandler(e) {
                         if (e.target && e.target.classList.contains('toggle-abstract')) {
                             const abstract = e.target.previousElementSibling;
                             abstract.classList.toggle('expanded');
-                            if (abstract.classList.contains('expanded')) {
-                                e.target.textContent = 'Show less';
-                            } else {
-                                e.target.textContent = 'Show more';
-                            }
+                            e.target.textContent = abstract.classList.contains('expanded') ? 'Show less' : 'Show more';
                         }
-                    });
+                    }
+
+                    document.addEventListener('click', toggleAbstractHandler);
+                    document.addEventListener('touchstart', toggleAbstractHandler);
                 }
 
                 // On page load, fetch and render all papers

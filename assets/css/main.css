@@ -49,35 +49,43 @@ INSPIRE LAODER
 }
 
 .paper-abstract strong,
-.paper-authors strong{
+.paper-authors strong {
     font-weight: bold;
     color: black
 }
 
 .paper-abstract {
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.6em;
-  transition: max-height 0.3s ease;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.6em;
+    transition: max-height 0.3s ease;
 }
 
 .paper-abstract.expanded {
-  -webkit-line-clamp: unset;
-  max-height: none;
-  overflow: visible;
+    -webkit-line-clamp: unset;
+    max-height: none;
+    overflow: visible;
 }
 
 .toggle-abstract {
-  background: none;
-  color: #0077cc;
-  border: none;
-  cursor: pointer;
-  font-size: 0.9em;
-  margin-top: 0.3em;
-  padding: 0;
+    background: none;
+    color: #0077cc; /* your preferred button color */
+    border: none;
+    cursor: pointer;
+    font-size: 0.9em;
+    margin-top: 0.3em;
+    padding: 0;
+    transition: color 0.2s ease;
+}
+
+.toggle-abstract:hover,
+.toggle-abstract:focus {
+    color: #005fa3; /* slightly darker blue on hover/focus */
+    outline: none;  /* optional, if you want to remove focus outline */
+    background: none;
 }
 
 
